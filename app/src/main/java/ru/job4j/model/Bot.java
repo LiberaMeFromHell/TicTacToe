@@ -2,7 +2,7 @@ package ru.job4j.model;
 
 import java.util.Random;
 
-public class Bot {
+class Bot {
 
     private Random random = new Random();
 

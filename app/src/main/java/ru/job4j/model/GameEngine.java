@@ -8,8 +8,15 @@ public interface GameEngine {
 
     char[] getPlayField();
 
+    void setPlayField(char[] playField);
+
     boolean isGameOver();
 
     boolean isDrawGame();
+
+    boolean isWhosTurn();
+
+    void setWhosTurn(boolean whosTurn);
+
 
 }

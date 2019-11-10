@@ -5,7 +5,9 @@ import android.util.Log;
 public class Logic implements GameEngine{
 
     private static Logic logic;
+
     private Bot bot;
+    private LogicCallback logicCallback;
 
     private char[] playField = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
 
@@ -14,15 +16,15 @@ public class Logic implements GameEngine{
     private boolean drawGame = false;
     private boolean gameOver = false;
 
-    public static synchronized Logic getInstance() {
+    public static synchronized Logic getInstance(LogicCallback logicCallback) {
         if (logic == null)
-            logic = new Logic();
+            logic = new Logic(logicCallback);
         return logic;
     }
 
-    private Logic() {
+    private Logic(LogicCallback logicCallback) {
         bot = Bot.getInstance();
-        //printDebug();
+        this.logicCallback = logicCallback;
     }
 
     public void updateField(int cellIndex) {
@@ -52,6 +54,8 @@ public class Logic implements GameEngine{
             if (botIsTurned && !whosTurn) {
                 updateField(bot.botsTurn(playField));
             }
+
+            logicCallback.updateUI(drawGame,gameOver,playField);
         }
     }
 
@@ -84,12 +88,6 @@ public class Logic implements GameEngine{
         }
     }
 
-    /*private void printDebug() {
-        Log.d("print", "Debug" + "\n" + playField[0] + playField[1] + playField[2] + "\n" +
-                playField[3] + playField[4] + playField[5] + "\n" +
-                playField[6] + playField[7] + playField[8]);
-    }*/
-
     private boolean isDraw() {
         boolean d = true;
         for (char c : playField) {
@@ -109,6 +107,18 @@ public class Logic implements GameEngine{
         return playField;
     }
 
+    public void setPlayField(char[] playField) {
+        this.playField = playField;
+    }
+
+    public boolean isWhosTurn() {
+        return whosTurn;
+    }
+
+    public void setWhosTurn(boolean whosTurn) {
+        this.whosTurn = whosTurn;
+    }
+
     public boolean isGameOver() {
         return gameOver;
     }
@@ -120,7 +130,17 @@ public class Logic implements GameEngine{
     /**
      * Workaround for testing purposes. We need a clean object to run tests properly. Singleton is bad
      */
-    public static Logic getNewInstance() {
-        return new Logic();
+    public static Logic getNewInstance(LogicCallback logicCallback) {
+        return new Logic(logicCallback);
+    }
+
+    public interface LogicCallback {
+        void updateUI(boolean isGameDraw, boolean isGameOver, char[] playFiled);
+    }
+
+    private void printDebug() {
+        Log.d("print", "Debug" + "\n" + playField[0] + playField[1] + playField[2] + "\n" +
+                playField[3] + playField[4] + playField[5] + "\n" +
+                playField[6] + playField[7] + playField[8]);
     }
 }

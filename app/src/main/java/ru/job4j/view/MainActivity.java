@@ -1,115 +1,72 @@
 package ru.job4j.view;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import ru.job4j.model.GameEngine;
 import ru.job4j.R;
-import ru.job4j.viewmodel.TicTacViewModel;
+import ru.job4j.model.GameEngine;
+import ru.job4j.model.Logic;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Logic.LogicCallback {
 
-    TicTacViewModel viewModel;
+    private GameEngine gameEngine;
 
-    List<Button> buttons = new ArrayList<>();
+    private List<Button> buttons;
 
-    Switch botSwitch;
-
-    Button button0;
-    Button button1;
-    Button button2;
-    Button button3;
-    Button button4;
-    Button button5;
-    Button button6;
-    Button button7;
-    Button button8;
+    private List<Integer> buttonIDs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        viewModel = ViewModelProviders.of(this).get(TicTacViewModel.class);
-
-        botSwitch = findViewById(R.id.botSwitch);
-        botSwitch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewModel.switchBot();
-            }
-        });
-
-        button0 = findViewById(R.id.button0);
-        button1 = findViewById(R.id.button1);
-        button2 = findViewById(R.id.button2);
-        button3 = findViewById(R.id.button3);
-        button4 = findViewById(R.id.button4);
-        button5 = findViewById(R.id.button5);
-        button6 = findViewById(R.id.button6);
-        button7 = findViewById(R.id.button7);
-        button8 = findViewById(R.id.button8);
-
-        buttons.add(button0);
-        buttons.add(button1);
-        buttons.add(button2);
-        buttons.add(button3);
-        buttons.add(button4);
-        buttons.add(button5);
-        buttons.add(button6);
-        buttons.add(button7);
-        buttons.add(button8);
-
-        viewModel.getLogic().observe(this, new Observer<GameEngine>() {
-            @Override
-            public void onChanged(GameEngine gameEngine) {
-                updateUI(gameEngine.isDrawGame(), gameEngine.isGameOver(), gameEngine.getPlayField());
-            }
-        });
+        gameEngine = Logic.getInstance(this);
+        initButtons();
     }
 
     public void answer(View view) {
         switch (view.getId()) {
             case R.id.button0:
-                viewModel.updateField(0);
+                gameEngine.updateField(0);
                 return;
             case R.id.button1:
-                viewModel.updateField(1);
+                gameEngine.updateField(1);
                 return;
             case R.id.button2:
-                viewModel.updateField(2);
+                gameEngine.updateField(2);
                 return;
             case R.id.button3:
-                viewModel.updateField(3);
+                gameEngine.updateField(3);
                 return;
             case R.id.button4:
-                viewModel.updateField(4);
+                gameEngine.updateField(4);
                 return;
             case R.id.button5:
-                viewModel.updateField(5);
+                gameEngine.updateField(5);
                 return;
             case R.id.button6:
-                viewModel.updateField(6);
+                gameEngine.updateField(6);
                 return;
             case R.id.button7:
-                viewModel.updateField(7);
+                gameEngine.updateField(7);
                 return;
             case R.id.button8:
-                viewModel.updateField(8);
+                gameEngine.updateField(8);
         }
     }
 
     public void updateUI(boolean isGameDraw, boolean isGameOver, char[] playFiled) {
+        initButtons();
         if (isGameDraw) {
             Toast.makeText(this, "Draw!", Toast.LENGTH_SHORT).show();
             for (int i = 0; i < 9; i++) {
@@ -122,8 +79,58 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             for (int i = 0; i < playFiled.length; i++) {
+                //Log.d("updateUI", "updateUI: " + buttons.get(i));
+                Log.d("print", "updateUI: " + playFiled[i]);
                 buttons.get(i).setText("" + playFiled[i]);
             }
+            Log.d("print", "------------------------------");
         }
+    }
+
+    private void initButtons() {
+        buttonIDs = null;
+        buttonIDs = Arrays.asList(R.id.button0, R.id.button1, R.id.button2,
+                R.id.button3, R.id.button4, R.id.button5,
+                R.id.button6, R.id.button7, R.id.button8);
+
+        Switch botSwitch = findViewById(R.id.botSwitch);
+        botSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gameEngine.switchBot();
+            }
+        });
+
+        buttons = new ArrayList<>();
+        for (Integer i : buttonIDs) {
+            buttons.add((Button)findViewById(i));
+        }
+
+        for (Button b: buttons) {
+            b.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    answer(view);
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("whosTurn",gameEngine.isWhosTurn());
+        outState.putCharArray("playField",gameEngine.getPlayField());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        initButtons();
+        gameEngine.setWhosTurn(savedInstanceState.getBoolean("whosTurn"));
+        Log.d("wasa", "onRestoreInstanceState: " + savedInstanceState.getBoolean("whosTurn"));
+        gameEngine.setPlayField(savedInstanceState.getCharArray("playField"));
+        Log.d("wasa", "onRestoreInstanceState: " + savedInstanceState.getCharArray("playField"));
+        this.updateUI(gameEngine.isDrawGame(),gameEngine.isGameOver(),gameEngine.getPlayField());
     }
 }
