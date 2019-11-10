@@ -9,15 +9,22 @@ import static org.junit.Assert.*;
 
 public class LogicTest {
     private Logic logic;
+    private Logic.LogicCallback logicCallback;
 
     @Before
     public void setup() {
-        logic = Logic.getNewInstance();
+         logicCallback = new Logic.LogicCallback() {
+            @Override
+            public void updateUI(boolean isGameDraw, boolean isGameOver, char[] playFiled) {
+
+            }
+        };
+        logic = Logic.getNewInstance(logicCallback);
     }
 
     @Test
     public void getInstance() {
-        Logic logic = Logic.getInstance();
+        Logic logic = Logic.getInstance(logicCallback);
         assertTrue(logic instanceof GameEngine);
     }
 
