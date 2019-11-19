@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">TicTacToy</string>
+    <string name="title">TicTacToy</string>
+    <string name="option_text">Enemy: PC|Human</string>
+</resources>
